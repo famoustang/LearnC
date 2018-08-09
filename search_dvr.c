@@ -11,10 +11,8 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include "search_dvr.h"
-/*
-	获取指定网口的本地IP地址，字符串形式返回，如：192.168.1.111
-	获取成功返回1，失败返回－1；
-*/
+#include "cross_sock.h"
+
 int get_netcard_ip(char *netcard , char *ip)
 {
 
@@ -69,7 +67,7 @@ int get_netcard_mtu(char *netcard)
 	ret = ioctl(sock,SIOCGIFMTU,&c_ifreq);
 	printf("%s mtu is: %d\n",netcard,c_ifreq.ifr_mtu);
 	
-	return atoi(c_ifreq.ifr_mtu);
+	return c_ifreq.ifr_mtu;
 	
 }
 
@@ -102,7 +100,9 @@ int SearchDVR(char *bindIP)
 
 	snprintf(srbuf,sizeof(srbuf),"%s",BUBBLE_SEARCH_STRING);
 	SOCK_sendto(sock_broadcast, BUBBLE_ADDR, BUBBLE_PORT, srbuf, sizeof(srbuf), 0);
+
 	while(1){
+		
 		FD_ZERO(&read_set);
 		FD_SET(sock_broadcast,&read_set);
 
@@ -121,10 +121,12 @@ int SearchDVR(char *bindIP)
 				ptr = strstr(srbuf,BUBBLE_SEARCH_ACK_STRING);
 
 				if(ptr){
+					
 					memset(ip,0,sizeof(ip));
 					ptr += 4;
 					ptrd = strstr(ptr,"&");
 					if(ptrd){
+						
 						strncpy(ip,ptr,ptrd - ptr);//ip
 					}
 
@@ -191,4 +193,18 @@ int SearchDVR(char *bindIP)
 	return 0;
 }
 
+int Modify_IPCAM_IP()
+{
+	struct sockaddr_in _sockaddr_in;
+	struct in_addr _in_addr;
+	int sockfd = -1;
+	char buf[1024];
+	
+	memset(buf,0,1024);
+	strcpy(buf,"CMD * HDS/1.1\r\nCSeq:0\r\nClient-ID:nvmOPxEnYfQRAeLFdsMrpBbnMDbEPiMC\r\nAccept-Type:text/HDP\r\nAuthorization:Digest username=\"admin\",realm=\"IPCAM\",uri=\"www.dvr163.com\",nonce=\"eCLeedjsMmgjRcOEfAZmytkYhvYANhbV\",response=\"4e3be568d30ec56f0cfb8cbf4364e035\",algorithm=\"MD5\"\r\nDevice-ID:IPCAMabcdefghijklmnopqrstdZNmIgx\r\nContent-Length:131\r\n\r\nnetconf set -ipaddr 192.168.13.127 -netmask 255.255.0.0 -gateway 192.168.1.254 -hwaddr 00:9A:1B:3A:0C:09\r\nhttpport set -httpport 80\r\n");
+	sockfd= SOCK_broadcast_udp_init(NULL, 0, 0, 5);
+	SOCK_sendto(sockfd, "239.255.255.250", 8002, buf, strlen(buf), 0);
+	
+	
+}
 
