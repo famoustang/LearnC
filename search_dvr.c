@@ -10,7 +10,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
-
+#include "search_dvr.h"
 /*
 	获取指定网口的本地IP地址，字符串形式返回，如：192.168.1.111
 	获取成功返回1，失败返回－1；
@@ -67,16 +67,11 @@ int get_netcard_mtu(char *netcard)
 	
 	strcpy(c_ifreq.ifr_name,netcard);
 	ret = ioctl(sock,SIOCGIFMTU,&c_ifreq);
-	printf("%s ip is: %d\n",netcard,c_ifreq.ifr_mtu);
+	printf("%s mtu is: %d\n",netcard,c_ifreq.ifr_mtu);
 	
-	return 0;
+	return atoi(c_ifreq.ifr_mtu);
 	
 }
-
-#define BUBBLE_PORT 9013
-#define BUBBLE_ADDR "255.255.255.255"
-#define BUBBLE_SEARCH_STRING "SEARCHDEV"
-#define BUBBLE_SEARCH_ACK_STRING "JA"
 
 int SearchDVR(char *bindIP)
 {
@@ -193,17 +188,7 @@ int SearchDVR(char *bindIP)
 			break;
 		}
 	}
+	return 0;
 }
 
-#define NETCARD "eth0"
-int main(char argc , char**args)
-{
-#if 0
-	char ip[16];
-	get_netcard_ip(NETCARD,ip);
-	get_netcard_mtu(NETCARD);
-	SearchDVR(ip);
-#else
-	SearchDVR(NULL);
-#endif
-}
+
