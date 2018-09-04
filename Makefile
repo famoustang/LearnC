@@ -43,7 +43,7 @@ OBJECTS := $(patsubst %.c,%.o,$(SRCS))
 
 LIB_OBJECTS := $(LIB_SRCS:%.c=%.o)
 
-.PHONY:all
+.PHONY:all app_lib objects lib_objects lib strip
 all:$(OBJECTS)
 	$(GCC) $(CFLAGS) -o $(TARGET) $(OBJECTS) 
 
@@ -60,8 +60,8 @@ lib:lib_objects
 $(OBJECTS):%.o:%.c
 	$(GCC) $(CFLAGS) -c $< -o $@
 	
-$(LIB_OBJECTS):%.o:%.c
-	$(GCC) $(CFLAGS) -c $< -o $@	
+#$(LIB_OBJECTS):%.o:%.c
+#	$(GCC) $(CFLAGS) -c $< -o $@	
 
 strip:
 	$(STRIP) $(TARGET) 

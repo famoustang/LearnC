@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define NETCARD "eth0"
+#define IP "192.168.13.123"
 int main(char argc , char**args)
 {
 #if 1
@@ -9,7 +10,8 @@ int main(char argc , char**args)
 	get_netcard_ip(NETCARD,ip);
 	get_netcard_mtu(NETCARD);
 	//SearchDVR(ip);
-	SearchIpcam(ip);
+	//SearchIpcam(ip);
+	ping(IP,5,0);
 #else
 	//SearchDVR(NULL);
 	Modify_IPCAM_IP();
